@@ -6,6 +6,7 @@
 <title>YB Property — ระบบจัดการอสังหาริมทรัพย์</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  /* ===== THEME: DARK (default) ===== */
   :root {
     --gold: #C9A84C;
     --gold-light: #E8C97A;
@@ -26,13 +27,75 @@
     --border2: rgba(201,168,76,0.08);
     --radius: 10px;
     --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --login-bg1: #0D0D0D;
+    --login-bg2: #1A1408;
+    --header-bg1: #1A1A1A;
+    --header-bg2: #1E1A10;
+    --card-hover-shadow: rgba(201,168,76,0.08);
+    --stat-num: var(--gold);
+  }
+
+  /* ===== THEME: LIGHT ===== */
+  [data-theme="light"] {
+    --gold: #B8860B;
+    --gold-light: #D4A017;
+    --gold-dark: #8B6508;
+    --dark: #F5F4F0;
+    --dark2: #FFFFFF;
+    --dark3: #F0EEE8;
+    --dark4: #E8E5DC;
+    --text: #1A1A1A;
+    --text2: #555555;
+    --text3: #999999;
+    --accent: #B8860B;
+    --red: #D93025;
+    --green: #1E8E3E;
+    --blue: #1967D2;
+    --purple: #7B2FBE;
+    --border: rgba(184,134,11,0.25);
+    --border2: rgba(184,134,11,0.1);
+    --shadow: 0 4px 24px rgba(0,0,0,0.12);
+    --login-bg1: #F5F4F0;
+    --login-bg2: #EDE8D8;
+    --header-bg1: #FFFFFF;
+    --header-bg2: #FDF8EE;
+    --card-hover-shadow: rgba(184,134,11,0.1);
+    --stat-num: var(--gold);
+  }
+
+  /* ===== THEME: VIBRANT ===== */
+  [data-theme="vibrant"] {
+    --gold: #FF6B35;
+    --gold-light: #FF8C5A;
+    --gold-dark: #E5501A;
+    --dark: #0A0E1A;
+    --dark2: #111827;
+    --dark3: #1C2535;
+    --dark4: #243044;
+    --text: #F0F4FF;
+    --text2: #A0AABF;
+    --text3: #5A6480;
+    --accent: #FF6B35;
+    --red: #FF4466;
+    --green: #00E676;
+    --blue: #29B6F6;
+    --purple: #CE93D8;
+    --border: rgba(255,107,53,0.25);
+    --border2: rgba(255,107,53,0.1);
+    --shadow: 0 4px 24px rgba(255,107,53,0.15);
+    --login-bg1: #0A0E1A;
+    --login-bg2: #0D1220;
+    --header-bg1: #111827;
+    --header-bg2: #131B2E;
+    --card-hover-shadow: rgba(255,107,53,0.12);
+    --stat-num: #FF6B35;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Sarabun',sans-serif; background:var(--dark); color:var(--text); min-height:100vh; }
+  body { font-family:'Sarabun',sans-serif; background:var(--dark); color:var(--text); min-height:100vh; transition:background .3s, color .3s; }
 
   /* ===== LOGIN SCREEN ===== */
   #loginScreen {
-    position:fixed; inset:0; background:linear-gradient(135deg, #0D0D0D 0%, #1A1408 50%, #0D0D0D 100%);
+    position:fixed; inset:0; background:linear-gradient(135deg, var(--login-bg1) 0%, var(--login-bg2) 50%, var(--login-bg1) 100%);
     display:flex; align-items:center; justify-content:center; z-index:9999; padding:20px;
   }
   .login-box {
@@ -64,7 +127,7 @@
   #appShell { display:none; }
 
   /* HEADER */
-  .header { background: linear-gradient(135deg, var(--dark2) 0%, #1E1A10 100%); border-bottom:1px solid var(--border); padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; gap:12px; }
+  .header { background: linear-gradient(135deg, var(--header-bg1) 0%, var(--header-bg2) 100%); border-bottom:1px solid var(--border); padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; gap:12px; }
   .logo { font-family:'Noto Serif Thai',serif; font-size:20px; font-weight:700; color:var(--gold); letter-spacing:1px; white-space:nowrap; }
   .logo span { color:var(--text2); font-weight:300; font-size:13px; margin-left:6px; }
   .header-tabs { display:flex; gap:2px; flex:1; justify-content:center; flex-wrap:wrap; }
@@ -109,7 +172,7 @@
   /* CARDS */
   .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:14px; }
   .card { background:var(--dark2); border:1px solid var(--border2); border-radius:14px; overflow:hidden; transition:all .2s; }
-  .card:hover { border-color:var(--border); box-shadow:0 8px 32px rgba(201,168,76,0.08); transform:translateY(-2px); }
+  .card:hover { border-color:var(--border); box-shadow:0 8px 32px var(--card-hover-shadow); transform:translateY(-2px); }
   .card-header { background:linear-gradient(135deg, var(--dark3), var(--dark4)); padding:13px 15px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
   .card-title { font-size:14px; font-weight:600; color:var(--text); line-height:1.4; flex:1; }
   .badge { padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
@@ -174,7 +237,7 @@
   /* STATS */
   .stats-row { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
   .stat-box { background:var(--dark2); border:1px solid var(--border2); border-radius:12px; padding:15px 16px; }
-  .stat-box .num { font-size:26px; font-weight:700; color:var(--gold); font-family:'Noto Serif Thai',serif; }
+  .stat-box .num { font-size:26px; font-weight:700; color:var(--stat-num); font-family:'Noto Serif Thai',serif; }
   .stat-box .lbl { font-size:12px; color:var(--text3); margin-top:3px; }
 
   /* IE PANEL */
@@ -208,6 +271,44 @@
     .header-tabs { order:3; width:100%; justify-content:flex-start; }
     .header-user { order:2; }
   }
+  .theme-switcher { display:flex; gap:5px; align-items:center; }
+  .theme-btn {
+    width:30px; height:30px; border-radius:50%; border:2px solid transparent;
+    cursor:pointer; transition:all .2s; position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; font-size:14px;
+    flex-shrink:0;
+  }
+  .theme-btn:hover { transform:scale(1.12); }
+  .theme-btn.active { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,168,76,0.3); }
+  .theme-btn-dark  { background:radial-gradient(circle at 40% 40%, #2A2420, #0D0D0D); }
+  .theme-btn-light { background:radial-gradient(circle at 40% 40%, #FDF8EE, #E8E0CC); }
+  .theme-btn-vibrant { background:radial-gradient(circle at 40% 40%, #1C2535, #0A0E1A); border-image:linear-gradient(135deg,#FF6B35,#29B6F6) 1; }
+  .theme-btn-vibrant.active { border-color:#FF6B35; box-shadow:0 0 0 2px rgba(255,107,53,0.35); }
+  .theme-label { font-size:10px; color:var(--text3); white-space:nowrap; display:none; }
+
+  /* Light theme overrides for readability */
+  [data-theme="light"] .login-box { box-shadow:0 20px 60px rgba(0,0,0,0.12); }
+  [data-theme="light"] .logout-btn { background:rgba(217,48,37,0.08); border-color:rgba(217,48,37,0.2); }
+  [data-theme="light"] tbody tr:hover td { background:rgba(184,134,11,0.05); }
+  [data-theme="light"] .modal-head { background:var(--dark2); }
+  [data-theme="light"] .output-box { background:var(--dark3); }
+  [data-theme="light"] .clipboard-preview { background:var(--dark3); }
+
+  /* Vibrant theme overrides */
+  [data-theme="vibrant"] .htab.active,
+  [data-theme="vibrant"] .htab:hover { background:rgba(255,107,53,0.12); color:var(--gold); }
+  [data-theme="vibrant"] .htab.active { border-color:var(--border); }
+  [data-theme="vibrant"] .login-box { box-shadow:0 20px 60px rgba(255,107,53,0.15); }
+  [data-theme="vibrant"] .card:hover { box-shadow:0 8px 32px rgba(255,107,53,0.15); }
+  [data-theme="vibrant"] .stat-box { background:linear-gradient(135deg, #111827, #1C2535); }
+  [data-theme="vibrant"] .badge-sale { background:rgba(255,68,102,0.18); color:#FF8080; border-color:rgba(255,68,102,0.3); }
+  [data-theme="vibrant"] .badge-rent { background:rgba(41,182,246,0.18); color:#80D4FF; border-color:rgba(41,182,246,0.3); }
+  [data-theme="vibrant"] .badge-both { background:rgba(255,107,53,0.18); color:#FF8C5A; border-color:rgba(255,107,53,0.3); }
+  [data-theme="vibrant"] .price-tag { color:#FF8C5A; }
+
+  @media(max-width:640px){
+    .theme-btn { width:26px; height:26px; font-size:12px; }
+  }
 </style>
 </head>
 <body>
@@ -231,6 +332,14 @@
     <button class="login-btn" onclick="doLogin()">🔐 เข้าสู่ระบบ</button>
     <div class="login-error" id="loginError">❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
     <div class="login-hint">ทดลองใช้: admin / admin1234 &nbsp;|&nbsp; user / user1234</div>
+    <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">เลือกธีม</div>
+      <div style="display:flex;gap:10px;justify-content:center;align-items:center;">
+        <button class="theme-btn theme-btn-dark" id="loginThemeDark" onclick="setTheme('dark')" title="ธีมมืด">🌙</button>
+        <button class="theme-btn theme-btn-light" id="loginThemeLight" onclick="setTheme('light')" title="ธีมสว่าง">☀️</button>
+        <button class="theme-btn theme-btn-vibrant" id="loginThemeVibrant" onclick="setTheme('vibrant')" title="ธีมสดใส">✨</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -248,6 +357,12 @@
     <button class="htab" id="tabUsers" onclick="switchTab('users',this)" style="display:none">👥 จัดการ User</button>
   </div>
   <div class="header-user">
+    <!-- Theme Switcher -->
+    <div class="theme-switcher" title="เลือกธีม">
+      <button class="theme-btn theme-btn-dark active" id="themeBtnDark" onclick="setTheme('dark')" title="ธีมมืด 🌙">🌙</button>
+      <button class="theme-btn theme-btn-light" id="themeBtnLight" onclick="setTheme('light')" title="ธีมสว่าง ☀️">☀️</button>
+      <button class="theme-btn theme-btn-vibrant" id="themeBtnVibrant" onclick="setTheme('vibrant')" title="ธีมสดใส ✨">✨</button>
+    </div>
     <div class="user-badge">
       <span id="headerUserName">-</span>
       <span class="role" id="headerUserRole">-</span>
@@ -594,32 +709,6 @@
   </div>
 </div>
 
-<!-- Admin Set Password Modal -->
-<div class="modal-bg" id="modalSetPw">
-  <div class="modal modal-sm">
-    <div class="modal-head">
-      <h2>🔐 ตั้งรหัสผ่านใหม่</h2>
-      <button class="close-btn" onclick="closeModal('setPw')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div id="sp_userinfo" style="background:var(--dark3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--text2);"></div>
-      <div class="form-group" style="margin-bottom:14px;">
-        <label>รหัสผ่านใหม่ <span style="color:var(--text3);font-weight:400">(อย่างน้อย 6 ตัวอักษร)</span></label>
-        <input type="password" id="sp_new" placeholder="รหัสผ่านใหม่">
-      </div>
-      <div class="form-group">
-        <label>ยืนยันรหัสผ่านใหม่</label>
-        <input type="password" id="sp_confirm" placeholder="ยืนยันรหัสผ่านใหม่">
-      </div>
-      <div id="sp_error" style="color:var(--red);font-size:13px;margin-top:10px;display:none;"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('setPw')">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="doSetPw()">🔐 ตั้งรหัสผ่าน</button>
-    </div>
-  </div>
-</div>
-
 </div><!-- /appShell -->
 
 <script>
@@ -821,7 +910,6 @@ function renderCustomers(){
 function renderUsers(){
   const tb = document.getElementById('userTable');
   if(!AUTH.users.length){ tb.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">ยังไม่มีผู้ใช้</td></tr>`; return; }
-  const isAdmin = AUTH.current && AUTH.current.role==='admin';
   tb.innerHTML = AUTH.users.map((u,i)=>{
     const isCurrentUser = AUTH.current && AUTH.current.username === u.username;
     return `<tr>
@@ -831,10 +919,9 @@ function renderUsers(){
       <td><span class="badge ${u.role==='admin'?'badge-admin':'badge-user2'}">${u.role==='admin'?'⭐ Admin':'👤 User'}</span></td>
       <td style="font-size:12px;color:var(--text3)">${u.note||'-'}</td>
       <td><div style="display:flex;gap:5px;flex-wrap:wrap;">
-        ${isAdmin?`<button class="btn btn-outline btn-sm" onclick="editUser(${i})">✏️ แก้ไข</button>`:''}
-        ${isAdmin?`<button class="btn btn-blue btn-sm" onclick="openSetPw(${i})">🔐 ตั้ง PW</button>`:''}
-        ${isCurrentUser?`<button class="btn btn-green btn-sm" onclick="openModal('changePw')">🔑 เปลี่ยน PW</button>`:''}
-        ${isAdmin&&!isCurrentUser?`<button class="btn btn-danger btn-sm" onclick="deleteUser(${i})">🗑️</button>`:''}
+        <button class="btn btn-outline btn-sm" onclick="editUser(${i})">✏️ แก้ไข</button>
+        ${!isCurrentUser?`<button class="btn btn-danger btn-sm" onclick="deleteUser(${i})">🗑️</button>`:''}
+        ${isCurrentUser?`<button class="btn btn-blue btn-sm" onclick="openModal('changePw')">🔑 เปลี่ยน PW</button>`:''}
       </div></td>
     </tr>`;
   }).join('');
@@ -894,35 +981,6 @@ function doChangePw(){
   if(idx>=0){ AUTH.users[idx].password=newPw; AUTH.current.password=newPw; }
   saveAuth(); closeModal('changePw');
   alert('✅ เปลี่ยนรหัสผ่านสำเร็จ');
-}
-
-let setPwTargetIdx = -1;
-function openSetPw(i){
-  if(AUTH.current?.role!=='admin'){ alert('เฉพาะ Admin เท่านั้น'); return; }
-  setPwTargetIdx = i;
-  const u = AUTH.users[i];
-  const isMe = AUTH.current.username === u.username;
-  document.getElementById('sp_userinfo').innerHTML =
-    `👤 <strong>${u.username}</strong> — ${u.displayname||'-'} &nbsp;<span class="badge ${u.role==='admin'?'badge-admin':'badge-user2'}">${u.role==='admin'?'⭐ Admin':'👤 User'}</span>${isMe?' <span style="color:var(--gold);font-size:12px">(คุณ)</span>':''}`;
-  document.getElementById('sp_new').value='';
-  document.getElementById('sp_confirm').value='';
-  document.getElementById('sp_error').style.display='none';
-  document.getElementById('modalSetPw').classList.add('open');
-}
-function doSetPw(){
-  const newPw  = document.getElementById('sp_new').value;
-  const con    = document.getElementById('sp_confirm').value;
-  const errEl  = document.getElementById('sp_error');
-  if(!newPw || newPw.length<6){ errEl.textContent='รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'; errEl.style.display='block'; return; }
-  if(newPw!==con){ errEl.textContent='รหัสผ่านไม่ตรงกัน'; errEl.style.display='block'; return; }
-  errEl.style.display='none';
-  const targetName = AUTH.users[setPwTargetIdx].username;
-  AUTH.users[setPwTargetIdx].password = newPw;
-  // ถ้าตั้งให้ตัวเองด้วยให้อัปเดต current
-  if(AUTH.current.username===targetName) AUTH.current.password=newPw;
-  saveAuth();
-  closeModal('setPw');
-  alert(`✅ ตั้งรหัสผ่านใหม่ให้ "${targetName}" สำเร็จ`);
 }
 
 // ============================
@@ -1060,11 +1118,11 @@ function getContactForClip(asset){
   const agIdx=document.getElementById('cbAgentSelect').value;
   if(agIdx!==''){
     const ag=DB.agents[parseInt(agIdx)];
-    let parts=[];
-    if(ag.name) parts.push(ag.name);
-    if(ag.tel) parts.push(ag.tel);
-    if(ag.line) parts.push(`Line ID : ${ag.line}`);
-    return parts.join(' ')||asset.contact||'';
+    let c='';
+    if(ag.name) c+=ag.name;
+    if(ag.tel) c+=(c?' ':'')+ag.tel;
+    if(ag.line) c+=(c?' | ':'')+`Line: ${ag.line}`;
+    return c||asset.contact||'';
   }
   return asset.contact||'';
 }
@@ -1285,8 +1343,32 @@ function clearAllData(){
 }
 
 // ============================
-// SAMPLE DATA
+// THEME SWITCHER
 // ============================
+const THEME_NAMES = { dark:'ธีมมืด', light:'ธีมสว่าง', vibrant:'ธีมสดใส' };
+
+function setTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('yb_theme', theme);
+  // Update active state on all theme buttons
+  ['dark','light','vibrant'].forEach(t=>{
+    const btn1 = document.getElementById('themeBtn'+cap2(t));
+    const btn2 = document.getElementById('loginTheme'+cap2(t));
+    if(btn1) btn1.classList.toggle('active', t===theme);
+    if(btn2) btn2.classList.toggle('active', t===theme);
+  });
+}
+
+function cap2(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// Load saved theme on init
+(function(){
+  const saved = localStorage.getItem('yb_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  // Sync button states after DOM ready
+  setTimeout(()=>setTheme(saved), 0);
+})();
+
 function importSampleData(){
   if(!confirm('โหลดข้อมูลตัวอย่าง? (ข้อมูลจะถูกเพิ่มเข้ามา)')) return;
   const sample = {
