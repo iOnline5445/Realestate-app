@@ -594,6 +594,32 @@
   </div>
 </div>
 
+<!-- Admin Set Password Modal -->
+<div class="modal-bg" id="modalSetPw">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h2>🔐 ตั้งรหัสผ่านใหม่</h2>
+      <button class="close-btn" onclick="closeModal('setPw')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="sp_userinfo" style="background:var(--dark3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--text2);"></div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <label>รหัสผ่านใหม่ <span style="color:var(--text3);font-weight:400">(อย่างน้อย 6 ตัวอักษร)</span></label>
+        <input type="password" id="sp_new" placeholder="รหัสผ่านใหม่">
+      </div>
+      <div class="form-group">
+        <label>ยืนยันรหัสผ่านใหม่</label>
+        <input type="password" id="sp_confirm" placeholder="ยืนยันรหัสผ่านใหม่">
+      </div>
+      <div id="sp_error" style="color:var(--red);font-size:13px;margin-top:10px;display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('setPw')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="doSetPw()">🔐 ตั้งรหัสผ่าน</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /appShell -->
 
 <script>
@@ -795,6 +821,7 @@ function renderCustomers(){
 function renderUsers(){
   const tb = document.getElementById('userTable');
   if(!AUTH.users.length){ tb.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">ยังไม่มีผู้ใช้</td></tr>`; return; }
+  const isAdmin = AUTH.current && AUTH.current.role==='admin';
   tb.innerHTML = AUTH.users.map((u,i)=>{
     const isCurrentUser = AUTH.current && AUTH.current.username === u.username;
     return `<tr>
@@ -804,9 +831,10 @@ function renderUsers(){
       <td><span class="badge ${u.role==='admin'?'badge-admin':'badge-user2'}">${u.role==='admin'?'⭐ Admin':'👤 User'}</span></td>
       <td style="font-size:12px;color:var(--text3)">${u.note||'-'}</td>
       <td><div style="display:flex;gap:5px;flex-wrap:wrap;">
-        <button class="btn btn-outline btn-sm" onclick="editUser(${i})">✏️ แก้ไข</button>
-        ${!isCurrentUser?`<button class="btn btn-danger btn-sm" onclick="deleteUser(${i})">🗑️</button>`:''}
-        ${isCurrentUser?`<button class="btn btn-blue btn-sm" onclick="openModal('changePw')">🔑 เปลี่ยน PW</button>`:''}
+        ${isAdmin?`<button class="btn btn-outline btn-sm" onclick="editUser(${i})">✏️ แก้ไข</button>`:''}
+        ${isAdmin?`<button class="btn btn-blue btn-sm" onclick="openSetPw(${i})">🔐 ตั้ง PW</button>`:''}
+        ${isCurrentUser?`<button class="btn btn-green btn-sm" onclick="openModal('changePw')">🔑 เปลี่ยน PW</button>`:''}
+        ${isAdmin&&!isCurrentUser?`<button class="btn btn-danger btn-sm" onclick="deleteUser(${i})">🗑️</button>`:''}
       </div></td>
     </tr>`;
   }).join('');
@@ -866,6 +894,35 @@ function doChangePw(){
   if(idx>=0){ AUTH.users[idx].password=newPw; AUTH.current.password=newPw; }
   saveAuth(); closeModal('changePw');
   alert('✅ เปลี่ยนรหัสผ่านสำเร็จ');
+}
+
+let setPwTargetIdx = -1;
+function openSetPw(i){
+  if(AUTH.current?.role!=='admin'){ alert('เฉพาะ Admin เท่านั้น'); return; }
+  setPwTargetIdx = i;
+  const u = AUTH.users[i];
+  const isMe = AUTH.current.username === u.username;
+  document.getElementById('sp_userinfo').innerHTML =
+    `👤 <strong>${u.username}</strong> — ${u.displayname||'-'} &nbsp;<span class="badge ${u.role==='admin'?'badge-admin':'badge-user2'}">${u.role==='admin'?'⭐ Admin':'👤 User'}</span>${isMe?' <span style="color:var(--gold);font-size:12px">(คุณ)</span>':''}`;
+  document.getElementById('sp_new').value='';
+  document.getElementById('sp_confirm').value='';
+  document.getElementById('sp_error').style.display='none';
+  document.getElementById('modalSetPw').classList.add('open');
+}
+function doSetPw(){
+  const newPw  = document.getElementById('sp_new').value;
+  const con    = document.getElementById('sp_confirm').value;
+  const errEl  = document.getElementById('sp_error');
+  if(!newPw || newPw.length<6){ errEl.textContent='รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'; errEl.style.display='block'; return; }
+  if(newPw!==con){ errEl.textContent='รหัสผ่านไม่ตรงกัน'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  const targetName = AUTH.users[setPwTargetIdx].username;
+  AUTH.users[setPwTargetIdx].password = newPw;
+  // ถ้าตั้งให้ตัวเองด้วยให้อัปเดต current
+  if(AUTH.current.username===targetName) AUTH.current.password=newPw;
+  saveAuth();
+  closeModal('setPw');
+  alert(`✅ ตั้งรหัสผ่านใหม่ให้ "${targetName}" สำเร็จ`);
 }
 
 // ============================
@@ -1003,11 +1060,11 @@ function getContactForClip(asset){
   const agIdx=document.getElementById('cbAgentSelect').value;
   if(agIdx!==''){
     const ag=DB.agents[parseInt(agIdx)];
-    let c='';
-    if(ag.name) c+=ag.name;
-    if(ag.tel) c+=(c?' ':'')+ag.tel;
-    if(ag.line) c+=(c?' | ':'')+`Line: ${ag.line}`;
-    return c||asset.contact||'';
+    let parts=[];
+    if(ag.name) parts.push(ag.name);
+    if(ag.tel) parts.push(ag.tel);
+    if(ag.line) parts.push(`Line ID : ${ag.line}`);
+    return parts.join(' ')||asset.contact||'';
   }
   return asset.contact||'';
 }
