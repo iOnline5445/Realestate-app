@@ -324,6 +324,15 @@
       <select class="cb-select" id="cbAssetSelect" onchange="generateClipboard()">
         <option value="">-- เลือกทรัพย์สิน --</option>
       </select>
+
+      <label style="font-size:13px;color:var(--text2);margin-bottom:6px;display:block;">เลือก Agent <span style="color:var(--text3);font-weight:400">(ไม่บังคับ — ถ้าเลือก จะใช้ข้อมูลติดต่อของ Agent แทน)</span></label>
+      <select class="cb-select" id="cbAgentSelect" onchange="onCbAgentChange()">
+        <option value="">-- ใช้ข้อมูลติดต่อจากทรัพย์สิน --</option>
+      </select>
+      <!-- Agent info preview -->
+      <div id="cbAgentPreview" style="display:none;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:13px;line-height:1.8;">
+      </div>
+
       <label style="font-size:13px;color:var(--text2);margin-bottom:8px;display:block;">ตัวเลือกเพิ่มเติม</label>
       <div class="cb-options">
         <label class="cb-opt"><input type="checkbox" id="cbContact" checked onchange="generateClipboard()"> แสดงข้อมูลติดต่อ</label>
@@ -910,7 +919,7 @@ function saveAgent(){
   const a={name:v('ag_name'),company:v('ag_company'),coagent:v('ag_coagent'),tel:v('ag_tel'),fb:v('ag_fb'),line:v('ag_line'),linelink:v('ag_linelink'),bank:v('ag_bank')};
   if(!a.name){ alert('กรุณาใส่ชื่อ Agent'); return; }
   if(editMode.idx>=0) DB.agents[editMode.idx]=a; else DB.agents.push(a);
-  saveDB(); closeModal('agent'); renderAgents();
+  saveDB(); closeModal('agent'); renderAgents(); populateCbAgentSelect();
 }
 function editAgent(i){
   const a=DB.agents[i];
@@ -946,7 +955,7 @@ function deleteItem(type,i){
   if(!confirm('ยืนยันการลบ?')) return;
   DB[type].splice(i,1); saveDB();
   if(type==='assets'){ renderAssets(); populateCbSelect(); }
-  if(type==='agents') renderAgents();
+  if(type==='agents'){ renderAgents(); populateCbAgentSelect(); }
   if(type==='customers') renderCustomers();
 }
 
@@ -964,17 +973,57 @@ function populateCbSelect(){
   if(!sel) return;
   sel.innerHTML='<option value="">-- เลือกทรัพย์สิน --</option>'+
     DB.assets.map((a,i)=>`<option value="${i}">${a.name||'ไม่มีชื่อ'} (${a.status||''})</option>`).join('');
+  populateCbAgentSelect();
+}
+function populateCbAgentSelect(){
+  const sel=document.getElementById('cbAgentSelect');
+  if(!sel) return;
+  sel.innerHTML='<option value="">-- ใช้ข้อมูลติดต่อจากทรัพย์สิน --</option>'+
+    DB.agents.map((ag,i)=>`<option value="${i}">${ag.name||'ไม่มีชื่อ'}${ag.company?' ('+ag.company+')':''}</option>`).join('');
+}
+function onCbAgentChange(){
+  const agIdx=document.getElementById('cbAgentSelect').value;
+  const preview=document.getElementById('cbAgentPreview');
+  if(agIdx===''){
+    preview.style.display='none';
+  } else {
+    const ag=DB.agents[parseInt(agIdx)];
+    let html=`<span style="color:var(--gold);font-weight:600;">👤 ${ag.name||''}</span>`;
+    if(ag.company) html+=` &nbsp;<span style="color:var(--text3)">${ag.company}</span>`;
+    html+='<br>';
+    if(ag.tel) html+=`📞 ${ag.tel} &nbsp;`;
+    if(ag.line) html+=`💬 Line: ${ag.line} &nbsp;`;
+    if(ag.linelink) html+=`🔗 <a href="${ag.linelink}" style="color:var(--blue)">${ag.linelink}</a>`;
+    preview.innerHTML=html;
+    preview.style.display='block';
+  }
+  generateClipboard();
+}
+function getContactForClip(asset){
+  const agIdx=document.getElementById('cbAgentSelect').value;
+  if(agIdx!==''){
+    const ag=DB.agents[parseInt(agIdx)];
+    let c='';
+    if(ag.name) c+=ag.name;
+    if(ag.tel) c+=(c?' ':'')+ag.tel;
+    if(ag.line) c+=(c?' | ':'')+`Line: ${ag.line}`;
+    return c||asset.contact||'';
+  }
+  return asset.contact||'';
 }
 function generateClipboard(){
   const idx=document.getElementById('cbAssetSelect').value;
   const out=document.getElementById('cbOutput');
   if(idx===''){ out.textContent='เลือกทรัพย์สินเพื่อสร้าง Clipboard...'; return; }
   const a=DB.assets[parseInt(idx)];
+  const contactOverride=getContactForClip(a);
   out.textContent=buildClipText(a,document.getElementById('cbTemplate').value,
     document.getElementById('cbContact').checked, document.getElementById('cbLink').checked,
-    document.getElementById('cbMap').checked, document.getElementById('cbNote').checked);
+    document.getElementById('cbMap').checked, document.getElementById('cbNote').checked,
+    contactOverride);
 }
-function buildClipText(a,tmpl,showContact,showLink,showMap,showNote){
+function buildClipText(a,tmpl,showContact,showLink,showMap,showNote,contactOverride){
+  const contact = (contactOverride!==undefined) ? contactOverride : (a.contact||'');
   const st=a.status==='ขาย'?'For Sale!! 🏷️':a.status==='เช่า'?'For Rent!! 🏠':'For Sale / Rent!! 🏷️🏠';
   if(tmpl==='short'){
     let t=`${st}\n📌 ${a.name||''}`;
@@ -982,7 +1031,7 @@ function buildClipText(a,tmpl,showContact,showLink,showMap,showNote){
     if(a.roomtype) t+=`\n🛏️ ${a.roomtype}`;
     if(a.area) t+=` | 📐 ${a.area}`;
     if(a.floor) t+=` | 🏗️ ${a.floor}`;
-    if(showContact&&a.contact) t+=`\n📞 ${a.contact}`;
+    if(showContact&&contact) t+=`\n📞 ${contact}`;
     if(showLink&&a.link) t+=`\n🔗 ${a.link}`;
     return t;
   }
@@ -997,7 +1046,7 @@ function buildClipText(a,tmpl,showContact,showLink,showMap,showNote){
     if(a.floor) t+=`🏢 ชั้น: ${a.floor}\n`;
     if(showNote&&a.note) t+=`\n📝 รายละเอียด:\n${a.note}\n`;
     t+=`━━━━━━━━━━━━━━━━━━━━\n`;
-    if(showContact&&a.contact) t+=`📞 สนใจติดต่อ: ${a.contact}\n`;
+    if(showContact&&contact) t+=`📞 สนใจติดต่อ: ${contact}\n`;
     if(showLink&&a.link) t+=`🔗 ${a.link}\n`;
     if(showMap&&a.map) t+=`📍 Map: ${a.map}\n`;
     t+=`\n#อสังหา #คอนโด #${a.status||''} #YBProperty`;
@@ -1010,7 +1059,7 @@ function buildClipText(a,tmpl,showContact,showLink,showMap,showNote){
     if(a.floor) t+=`🔢 ${a.floor}\n`;
     if(a.location) t+=`📌 ${a.location}\n`;
     if(showNote&&a.note) t+=`\n${a.note}\n`;
-    if(showContact&&a.contact) t+=`\n📞 ${a.contact}`;
+    if(showContact&&contact) t+=`\n📞 ${contact}`;
     if(showLink&&a.link) t+=`\n${a.link}`;
     if(showMap&&a.map) t+=`\n${a.map}`;
     return t;
@@ -1022,14 +1071,14 @@ function buildClipText(a,tmpl,showContact,showLink,showMap,showNote){
   if(a.floor) t+=`🏢 ${a.floor}\n`;
   if(a.location) t+=`📍 ทำเล: ${a.location}\n`;
   if(showNote&&a.note) t+=`\n📝 รายละเอียด:\n${a.note}\n`;
-  if(showContact&&a.contact) t+=`\n📞 สนใจโทร/ไลน์: ${a.contact}\n`;
+  if(showContact&&contact) t+=`\n📞 สนใจโทร/ไลน์: ${contact}\n`;
   if(showLink&&a.link) t+=`🔗 ${a.link}\n`;
   if(showMap&&a.map) t+=`📍 Map: ${a.map}\n`;
   return t;
 }
 function quickClip(idx){
   const a=DB.assets[idx];
-  document.getElementById('clipPreviewText').textContent=buildClipText(a,'full',true,true,true,true);
+  document.getElementById('clipPreviewText').textContent=buildClipText(a,'full',true,true,true,true,a.contact||'');
   document.getElementById('modalClipPreview').classList.add('open');
 }
 function copyClipboard(){
